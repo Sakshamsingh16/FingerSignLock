@@ -22,7 +22,7 @@ jobs:
       - name: Extract source ZIP
         run: |
           unzip -o FingerSignLock-Source.zip -d .
-          ls -la
+          mkdir -p app/src/main/assets
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -34,19 +34,26 @@ jobs:
         run: |
           echo "ANDROID_HOME=$ANDROID_HOME"
           test -d "$ANDROID_HOME/platform-tools"
-          ls "$ANDROID_HOME"
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
 
+      - name: Download hand detection model
+        run: |
+          curl -L --fail --retry 3 \
+            https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task \
+            -o app/src/main/assets/hand_landmarker.task
+          test -s app/src/main/assets/hand_landmarker.task
+
       - name: Build debug APK
-        run: gradle assembleDebug
+        run: gradle --no-daemon assembleDebug
 
       - name: Upload APK
-        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: FingerSignLock-debug-apk
-          path: app/build/outputs/apk/debug/*.apk
+          path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14
