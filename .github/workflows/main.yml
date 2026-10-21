@@ -30,8 +30,11 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+      - name: Check Android SDK
+        run: |
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          test -d "$ANDROID_HOME/platform-tools"
+          ls "$ANDROID_HOME"
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
@@ -47,4 +50,3 @@ jobs:
         with:
           name: FingerSignLock-debug-apk
           path: app/build/outputs/apk/debug/*.apk
-          
